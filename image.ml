@@ -1,16 +1,13 @@
-open Dmc
-open Dmc.Syntax
-open Dmc.Logic
-open Dmc.DigitalPlane
+open Csmc
+open Csmc.PictureLogic
+open Csmc.DigitalPlane
 open Images
 open Graphics
 
 let red color = (color / (256 * 256)) mod 256 
 let green color = (color / 256) mod 256 
 let blue color = color mod 256 
-
-
-
+  
 let load_image filename =
   match Bmp.load filename [] with
   | Rgb24 rgbimg -> rgbimg

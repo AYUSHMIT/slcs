@@ -28,7 +28,9 @@ rule token = parse
 | "U" {UNTIL}
 | "->" {ARR}
 | "=" {EQ}
-| ['>' '<' '+' '-' '*' '/' '~']+ as lxm {BINOP lxm}
+| "#" {HASH}
+| "~" {UNOP "~"}
+| ['>' '<' '+' '-' '*' '/']+ as lxm {BINOP lxm}
 | ['A'-'Z' 'a'-'z']['A'-'Z' 'a'-'z' '0'-'9']* as lxm {IDE lxm} 
 | eof {raise Eof}
 

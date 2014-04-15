@@ -1,4 +1,5 @@
 %token EOL
+%token HASH
 %token RESET
 %token LPAREN
 %token RPAREN
@@ -12,6 +13,7 @@
 %token CLOS
 %token INT
 %token UNTIL
+%token <string> UNOP
 %token <string> BINOP
 %token RED
 %token GREEN
@@ -25,30 +27,30 @@
 %token LET
 %token EQ
 %start main
-%type <Dmc.Syntax.syntax> main
+%type <Csmc.PictureLogic.syntax> main
 %%
 main:
- | PAINT color_const formula eol {Dmc.Syntax.PAINT ($2,$3)} 
- | LET IDE EQ formula eol {Dmc.Syntax.LET ($2,[],$4)}
- | LET IDE formalarglist EQ formula eol {Dmc.Syntax.LET ($2,$3,$5)} 
- | RESET eol {Dmc.Syntax.RESET}
+ | PAINT color formula eol {Csmc.PictureLogic.PAINT (Csmc.Picture.COL $2,$3)} 
+ | LET IDE EQ formula eol {Csmc.PictureLogic.LET ($2,[],$4)}
+ | LET IDE formalarglist EQ formula eol {Csmc.PictureLogic.LET ($2,$3,$5)} 
+ | RESET eol {Csmc.PictureLogic.RESET}
   ;
   eol:
  | EOL {}
   ;
   formula:
  | LPAREN formula RPAREN {$2}
- | TRUE {Dmc.Syntax.TRUE}
- | FALSE {Dmc.Syntax.FALSE}
- | IDE {Dmc.Syntax.CALL ($1,[])}
- | IDE actualarglist {Dmc.Syntax.CALL ($1,$2)}
- | LBRACKET expr RBRACKET {Dmc.Syntax.PROP $2}
- | NOT formula {Dmc.Syntax.NOT $2}
- | formula AND formula {Dmc.Syntax.AND ($1,$3)}
- | formula OR formula {Dmc.Syntax.OR ($1,$3)}
- | CLOS formula {Dmc.Syntax.CLOS $2}
- | INT formula {Dmc.Syntax.INT $2}
- | formula UNTIL formula {Dmc.Syntax.UNTIL ($1,$3)}
+ | TRUE {Csmc.PictureLogic.TRUE}
+ | FALSE {Csmc.PictureLogic.FALSE}
+ | IDE {Csmc.PictureLogic.CALL ($1,[])}
+ | IDE actualarglist {Csmc.PictureLogic.CALL ($1,$2)}
+ | LBRACKET prop RBRACKET {Csmc.PictureLogic.PROP $2}
+ | NOT formula {Csmc.PictureLogic.NOT $2}
+ | formula AND formula {Csmc.PictureLogic.AND ($1,$3)}
+ | formula OR formula {Csmc.PictureLogic.OR ($1,$3)}
+ | CLOS formula {Csmc.PictureLogic.CLOS $2}
+ | INT formula {Csmc.PictureLogic.INT $2}
+ | formula UNTIL formula {Csmc.PictureLogic.UNTIL ($1,$3)}
   ;
   formalarglist:
     LPAREN innerformalarglist RPAREN {$2}
@@ -61,17 +63,19 @@ main:
  | formula {[$1]}
  | formula COMMA actualarglist {$1::$3}
   ;
-  expr:
- | color_const {Dmc.Syntax.COLOR $1}
- | value BINOP value {Dmc.Syntax.BINOP ($1,$2,$3)}
- | value EQ value {Dmc.Syntax.BINOP ($1,"=",$3)}
+  prop:
+ | color {Csmc.Picture.COL $1}
+ | UNOP color {Csmc.Picture.UNOP ($1,$2)}
+ | value BINOP value {Csmc.Picture.BINOP ($1,$2,$3)}
+ | value EQ value {Csmc.Picture.BINOP ($1,"=",$3)} 
   ;
-  color_const:
- | QUOTE IDE QUOTE {$2}
+  color:
+ | QUOTE IDE QUOTE {Csmc.Picture.COLOR $2}
+ | HASH NUM NUM NUM {Csmc.Picture.RGB ($2,$3,$4)}
   ;
   value:
- | RED {Dmc.Syntax.RED}
- | GREEN {Dmc.Syntax.GREEN}
- | BLUE {Dmc.Syntax.BLUE}
- | NUM {Dmc.Syntax.NUM $1}
+ | RED {Csmc.Picture.RED}
+ | GREEN {Csmc.Picture.GREEN}
+ | BLUE {Csmc.Picture.BLUE}
+ | NUM {Csmc.Picture.NUM $1}
 

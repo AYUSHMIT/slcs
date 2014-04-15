@@ -1,7 +1,6 @@
-open Dmc
-open Dmc.Syntax
-open Dmc.Logic
-open Dmc.DigitalPlane 
+open Csmc
+open Csmc.PictureLogic
+open Csmc.DigitalPlane 
 open Image
       
 let split_extension filename =
@@ -15,9 +14,8 @@ let _ =
   let rgbimg = ref (load_image imagename) in
   let model = model_of_image (!rgbimg) in
   let env = ref Env.empty in
-  let (channel,dst) = try (open_in Sys.argv.(2),Some Sys.argv.(3)) with _ -> draw_image (!rgbimg);(stdin,None) in
-  let lexbuf = Lexing.from_channel channel in
-  let exit = ref false in
+  let lexbufs = ref (List.map Lexing.from_channel (try [open_in Sys.argv.(2);stdin] with _ -> [stdin])) in
+  let dst = try Some Sys.argv.(3) with _ -> draw_image (!rgbimg);None in
   let counter = ref 0 in
   let refresh () =
     match dst with
@@ -27,14 +25,19 @@ let _ =
 	  let (name,ext) = split_extension filename in
 	  Printf.sprintf "%s_%d.%s" name (!counter) ext in
       save_image (!rgbimg) realfilename in
-  while not (!exit) do
+  while (!lexbufs) != [] do    
+    let lexbuf = List.hd (!lexbufs) in
     try
       let syntax = Parser.main Lexer.token lexbuf in
       match syntax with
-	PAINT (color, fsyntax) ->
+	PAINT (c, fsyntax) ->
+	  let color = 
+	    (match c with
+	      Picture.COL (Picture.RGB (r,g,b)) -> { Color.r = r; Color.g = g; Color.b = b }
+	    | Picture.COL (Picture.COLOR s) -> Color.color_parse s) in
 	  let formula = formula_of_fsyntax (!env) fsyntax in
 	  let points = check model formula in
-	  let img2 = draw_image_points (!rgbimg) points (Color.color_parse color) in
+	  let img2 = draw_image_points (!rgbimg) points color in
 	  rgbimg := img2;
 	  refresh ()
       | LET (ide,formalargs,fsyntax) -> 
@@ -44,7 +47,7 @@ let _ =
 	counter := !counter + 1;
 	refresh ()
     with
-      Lexer.Eof -> exit := true
+      Lexer.Eof -> lexbufs := List.tl (!lexbufs)
     | exn -> 
       let msg = Printexc.to_string exn in
       let curr = lexbuf.Lexing.lex_curr_p in

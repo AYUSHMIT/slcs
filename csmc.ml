@@ -1,4 +1,13 @@
-module Logic = struct
+open Color.Rgb
+
+module type LANG = sig
+  type syntax
+  type semantics
+  val string_of : syntax -> string
+  val sem : syntax -> semantics
+end
+
+module Logic ( Prop : LANG) = struct
   type 'a formula = 
     T 
   | Prop of 'a
@@ -6,38 +15,13 @@ module Logic = struct
   | And of ('a formula * 'a formula) 
   | Closure of ('a formula) 
   | Until of ('a formula * 'a formula)
-end
-
-open Logic
-
-let binops =
-  let l = [("=",(=));
-	   ("~", fun x y -> (x > y - 10) && (x < y + 10));
-	   (">=",(>=));
-	   ("<=",(<=));
-	   ("<",(<));
-	   (">",(>))] in
-  let h = Hashtbl.create (List.length l) in
-  List.iter (fun (k,v) -> Hashtbl.add h k v) l;
-  Hashtbl.find h
-
-module Env = Map.Make(String)
-
-module Syntax = struct
-  type value = 
-    RED
-  | GREEN
-  | BLUE
-  | NUM of int
-
-  type expr =  
-    COLOR of string 
-  | BINOP of (value * string * value)
+      
+  module Env = Map.Make(String)
 
   type fsyntax =
     TRUE 
   | FALSE
-  | PROP of expr
+  | PROP of Prop.syntax
   | NOT of fsyntax
   | AND of (fsyntax * fsyntax)
   | OR of (fsyntax * fsyntax)
@@ -45,24 +29,12 @@ module Syntax = struct
   | INT of fsyntax
   | UNTIL of (fsyntax * fsyntax)
   | CALL of string * (fsyntax list) 
-
-  let rec string_of_value value =
-    match value with
-      RED -> "R"
-    | GREEN -> "G"
-    | BLUE -> "B"
-    | NUM i -> string_of_int i
-
-  let rec string_of_expr expr =
-    match expr with
-      COLOR s -> Printf.sprintf "\"s\""
-    | BINOP (v1,op,v2) -> Printf.sprintf "%s %s %s" (string_of_value v1) op (string_of_value v2) 
-
+      
   let rec string_of_fsyntax f =
     match f with
       TRUE -> "T"
     | FALSE -> "F"
-    | PROP expr -> string_of_expr expr
+    | PROP prop -> Prop.string_of prop
     | NOT f -> Printf.sprintf "!(%s)" (string_of_fsyntax f)
     | AND (f1,f2) -> Printf.sprintf "(%s & %s)" (string_of_fsyntax f1) (string_of_fsyntax f2) 
     | OR (f1,f2) -> Printf.sprintf "(%s | %s)" (string_of_fsyntax f1) (string_of_fsyntax f2) 
@@ -70,53 +42,41 @@ module Syntax = struct
     | INT f -> Printf.sprintf "(I %s)" (string_of_fsyntax f)
     | UNTIL (f1,f2) -> Printf.sprintf "(%s U %s)" (string_of_fsyntax f1) (string_of_fsyntax f2) 
     | CALL (f,args) -> Printf.sprintf "%s%s" f (string_of_arglist args)
-
+      
   and string_of_arglist args =
     match args with 
       [] -> ""
     | _ -> Printf.sprintf "(%s)" (string_of_arglist_inner args)
-
+      
   and string_of_arglist_inner args =
     match args with 
       [] -> ""
     | [x] -> string_of_fsyntax x
     | x::xs -> Printf.sprintf "%s,%s" (string_of_fsyntax x) (string_of_arglist_inner xs)
-
-  let rec feature_of_value value p =
-    match value with
-      RED -> p.Color.r
-    | GREEN -> p.Color.g
-    | BLUE -> p.Color.b
-    | NUM i -> i
-
-  let rec fun_of_expr expr =
-    match expr with
-      COLOR s -> fun p -> p = Color.color_parse s
-    | BINOP (v1,op,v2) -> fun p -> binops op (feature_of_value v1 p) (feature_of_value v2 p)
-
+      
   let rec fsyntax_sub f fsyntax =
     match fsyntax with
       CALL (ide,arglist) -> f ide
     | x -> x
-
+      
   let rec zipenv env l1 l2 =
     match (l1,l2) with
       ([],[]) -> env
     | (x::xs,y::ys) -> Env.add x (fun [] -> y) (zipenv env xs ys)
     | _ -> raise (Failure "zipenv")
-
+      
   type 'a myfun = 'a formula list -> 'a formula
-
+    
   let rec fun_of_decl ide (env : 'a myfun Env.t) (formalargs : string list) (body : fsyntax) (actualargs : 'a formula list) =
     let newenv =
       try
 	zipenv env formalargs actualargs
       with _ -> failwith (Printf.sprintf "wrong number of arguments in call to %s" ide) in
     formula_of_fsyntax newenv body
-
+      
   and formula_of_fsyntax (env : 'a myfun Env.t) (fsyntax : fsyntax) =
     match fsyntax with
-      PROP expr -> Prop (fun_of_expr expr)
+      PROP prop -> Prop (Prop.sem prop)
     | TRUE -> T
     | FALSE -> Not T
     | NOT t -> Not (formula_of_fsyntax env t)
@@ -128,15 +88,91 @@ module Syntax = struct
     | CALL (ide,arglist) -> 
       try (Env.find ide env) (List.map (formula_of_fsyntax env) arglist)
       with _ -> failwith (Printf.sprintf "Unbound identifier: %s" ide)
-
+	
   type syntax = 
-    PAINT of (string * fsyntax)
+    PAINT of (Prop.syntax * fsyntax)
   | LET of string * (string list) * fsyntax
   | RESET
 end
 
+module Picture = struct      
+  let almost x y = (x > y - 10) && (x < y + 10)
+    
+  let tabulate list =
+    let h = Hashtbl.create (List.length list) in
+    List.iter (fun (k,v) -> Hashtbl.add h k v) list;
+    Hashtbl.find h
+      
+  let unops =
+    tabulate [("~",fun c y -> almost c.r y.r && almost c.g y.g && almost c.b y.b)] 
+
+  let binops =
+    tabulate [("=",(=));
+	      (">=",(>=));
+	      ("<=",(<=));
+	      ("<",(<));
+	      (">",(>))]       
+    
+  type value =
+    RED
+  | GREEN
+  | BLUE
+  | NUM of int
+      
+  type color =
+    COLOR of string
+  | RGB of (int * int * int)
+
+  type syntax =  
+    COL of color
+  | UNOP of (string * color)
+  | BINOP of (value * string * value)
+      
+  let rec string_of_value value =
+    match value with
+      RED -> "R"
+    | GREEN -> "G"
+    | BLUE -> "B"
+    | NUM i -> string_of_int i
+      
+  let rec string_of_color color =
+    match color with
+      COLOR s -> Printf.sprintf "\"s\""
+    | RGB (r,g,b) -> Printf.sprintf "# %d %d %d" r g b
+
+  let rec string_of syntax =
+    match syntax with
+      COL c -> string_of_color c
+    | UNOP (op,c) -> Printf.sprintf "%s %s" op (string_of_color c)
+    | BINOP (v1,op,v2) -> Printf.sprintf "%s %s %s" (string_of_value v1) op (string_of_value v2) 
+      
+  type semantics = Color.Rgb.t -> bool
+
+  let rec feature_of_value value p =
+    match value with
+      RED -> p.Color.r
+    | GREEN -> p.Color.g
+    | BLUE -> p.Color.b
+    | NUM i -> i
+      
+  let colorsem color =
+    match color with
+      COLOR s -> Color.color_parse s
+    | RGB (r,g,b) -> { r = r ; g = g; b = b }
+
+  let rec sem syn color =
+    match syn with
+    | COL c -> color = (colorsem c)
+    | UNOP (op,c) -> unops op color (colorsem c)
+    | BINOP (v1,op,v2) -> binops op (feature_of_value v1 color) (feature_of_value v2 color)
+end
+
+module PictureLogic = Logic(Picture)
+
 module DMC (Point : Set.OrderedType) =
 struct
+  open PictureLogic
+
   module PSet = Set.Make(Point)
   type pointSet = PSet.t
   type point = PSet.elt
