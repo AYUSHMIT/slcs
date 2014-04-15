@@ -7,3 +7,10 @@
 *.cmx
 *.cmxs
 *.cmxa
+dmc
+parser.mli
+*.output
+lexer.ml
+parser.ml
+
+
