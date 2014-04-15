@@ -1,0 +1,6 @@
+Let narrow = [RED<BLUE];
+
+Paint "red" narrow;
+Paint "blue" ["white"];
+Reset;
+Paint "orange" narrow;
