@@ -14,8 +14,11 @@ let _ =
   let rgbimg = ref (load_image imagename) in
   let model = model_of_image (!rgbimg) in
   let env = ref Env.empty in
-  let lexbufs = ref (List.map Lexing.from_channel (try [open_in Sys.argv.(2);stdin] with _ -> [stdin])) in
-  let dst = try Some Sys.argv.(3) with _ -> draw_image (!rgbimg);None in
+  let (lexbufs,dst) =
+    match ((try Some (open_in Sys.argv.(2)) with _ -> None), (try Some Sys.argv.(3) with _ -> None)) with
+      (None,_) -> draw_image (!rgbimg);(ref [Lexing.from_channel stdin],None)
+    | (Some in1,None) -> draw_image (!rgbimg); (ref [Lexing.from_channel in1;Lexing.from_channel stdin],None)
+    | (Some in1,dst) -> (ref [Lexing.from_channel in1],dst) in
   let counter = ref 0 in
   let refresh () =
     match dst with

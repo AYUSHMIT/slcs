@@ -8,7 +8,7 @@ test: csmc
 	./csmc example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc example-map/output.bmp
 
 interactive-test: csmc
-	rlfe ./csmc example-map/openstreetmap-pisa.bmp || ./csmc example-map/openstreetmap-pisa.bmp
+	rlfe ./csmc example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc || ./csmc example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc
 
 parser.cmx: parser.ml
 	$(OCAMLC) -c parser.mli
