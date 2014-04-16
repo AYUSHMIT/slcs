@@ -19,6 +19,7 @@
 %token GREEN
 %token BLUE
 %token ARR
+%token HAT
 %token COMMA
 %token QUOTE
 %token <int> NUM
@@ -49,6 +50,7 @@ main:
  | formula AND formula {Csmc.PictureLogic.AND ($1,$3)}
  | formula OR formula {Csmc.PictureLogic.OR ($1,$3)}
  | CLOS formula {Csmc.PictureLogic.CLOS $2}
+ | CLOS HAT NUM formula {Csmc.PictureLogic.CLOSN ($3,$4)}
  | INT formula {Csmc.PictureLogic.INT $2}
  | formula UNTIL formula {Csmc.PictureLogic.UNTIL ($1,$3)}
   ;

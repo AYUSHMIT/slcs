@@ -26,6 +26,7 @@ module Logic ( Prop : LANG) = struct
   | AND of (fsyntax * fsyntax)
   | OR of (fsyntax * fsyntax)
   | CLOS of fsyntax
+  | CLOSN of (int * fsyntax)
   | INT of fsyntax
   | UNTIL of (fsyntax * fsyntax)
   | CALL of string * (fsyntax list) 
@@ -39,6 +40,7 @@ module Logic ( Prop : LANG) = struct
     | AND (f1,f2) -> Printf.sprintf "(%s & %s)" (string_of_fsyntax f1) (string_of_fsyntax f2) 
     | OR (f1,f2) -> Printf.sprintf "(%s | %s)" (string_of_fsyntax f1) (string_of_fsyntax f2) 
     | CLOS f -> Printf.sprintf "(C %s)" (string_of_fsyntax f)
+    | CLOSN (i,f) -> Printf.sprintf "(C^%d %s)" i (string_of_fsyntax f)
     | INT f -> Printf.sprintf "(I %s)" (string_of_fsyntax f)
     | UNTIL (f1,f2) -> Printf.sprintf "(%s U %s)" (string_of_fsyntax f1) (string_of_fsyntax f2) 
     | CALL (f,args) -> Printf.sprintf "%s%s" f (string_of_arglist args)
@@ -83,6 +85,7 @@ module Logic ( Prop : LANG) = struct
     | AND (t1,t2) -> And (formula_of_fsyntax env t1,formula_of_fsyntax env t2)
     | OR (t1,t2) -> Not (And (Not (formula_of_fsyntax env t1), Not (formula_of_fsyntax env t2)))
     | CLOS t -> Closure (formula_of_fsyntax env t)
+    | CLOSN (n,t) -> if n <= 0 then (formula_of_fsyntax env t) else Closure (formula_of_fsyntax env (CLOSN(n-1,t)))
     | INT t -> Not (Closure (Not (formula_of_fsyntax env t)))
     | UNTIL (t1,t2) -> Until (formula_of_fsyntax env t1,formula_of_fsyntax env t2)
     | CALL (ide,arglist) -> 

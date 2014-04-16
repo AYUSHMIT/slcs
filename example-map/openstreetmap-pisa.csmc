@@ -1,18 +1,15 @@
-Let everywhere(p) = p U false;
-
 Let bigStreet = [~ # 248 213 169];
 Let midStreet = [~ # 247 247 186];
-Let streeta = bigStreet | midStreet;
-Let street = C(C(C(streeta)));
+Let street1 = bigStreet | midStreet;
+Let street = C^3 street1;
 Let river = [~ # 181 208 208];
 Let stadium = [~ # 51 204 153];
 
-Let cnr = ["red"];
-Let station = ["blue"];
-
 Let stadiumArea = !((!stadium) U street);
-Let streetsAroundStadium = street & C(C(C(C(C(C(C(stadiumArea)))))));
+Let streetsAroundStadium = street & C^10 stadiumArea;
 
+Paint "orange" stadiumArea;
 Paint "red" streetsAroundStadium;
+
 
 

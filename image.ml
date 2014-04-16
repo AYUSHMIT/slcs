@@ -90,7 +90,7 @@ let create_graphics_thread =
 	then (size := newsize; redraw ()) 
     done)
     
-let draw_image =
+let draw_rgb =
   let channel = Event.new_channel () in
   let inited = ref false in  
   let init () =
@@ -104,7 +104,7 @@ let draw_image =
     if not (!inited) then init ();
     Event.sync (Event.send channel (Draw img)))
 	
-let draw_image_points rgbimg points color =
+let draw_rgb_points rgbimg points color =
   let rgbimg2 = Rgb24.copy rgbimg in
   PSet.iter (fun (x,y) ->  Rgb24.set rgbimg2 x y color) points;
   rgbimg2

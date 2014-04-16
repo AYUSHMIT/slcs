@@ -30,6 +30,7 @@ rule token = parse
 | "=" {EQ}
 | "#" {HASH}
 | "~" {UNOP "~"}
+| "^" {HAT}
 | ['>' '<' '+' '-' '*' '/']+ as lxm {BINOP lxm}
 | ['A'-'Z' 'a'-'z']['A'-'Z' 'a'-'z' '0'-'9']* as lxm {IDE lxm} 
 | eof {raise Eof}

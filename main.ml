@@ -16,13 +16,13 @@ let _ =
   let env = ref Env.empty in
   let (lexbufs,dst) =
     match ((try Some (open_in Sys.argv.(2)) with _ -> None), (try Some Sys.argv.(3) with _ -> None)) with
-      (None,_) -> draw_image (!rgbimg);(ref [Lexing.from_channel stdin],None)
-    | (Some in1,None) -> draw_image (!rgbimg); (ref [Lexing.from_channel in1;Lexing.from_channel stdin],None)
+      (None,_) -> draw_rgb (!rgbimg);(ref [Lexing.from_channel stdin],None)
+    | (Some in1,None) -> draw_rgb (!rgbimg); (ref [Lexing.from_channel in1;Lexing.from_channel stdin],None)
     | (Some in1,dst) -> (ref [Lexing.from_channel in1],dst) in
   let counter = ref 0 in
-  let refresh () =
+  let reload () =
     match dst with
-      None -> draw_image (!rgbimg)
+      None -> draw_rgb (!rgbimg)
     | Some filename -> 	    
       let realfilename = if !counter=0 then filename else 
 	  let (name,ext) = split_extension filename in
@@ -40,15 +40,15 @@ let _ =
 	    | Picture.COL (Picture.COLOR s) -> Color.color_parse s) in
 	  let formula = formula_of_fsyntax (!env) fsyntax in
 	  let points = check model formula in
-	  let img2 = draw_image_points (!rgbimg) points color in
+	  let img2 = draw_rgb_points (!rgbimg) points color in
 	  rgbimg := img2;
-	  refresh ()
+	  reload ()
       | LET (ide,formalargs,fsyntax) -> 
 	env := Env.add ide (fun_of_decl ide (!env) formalargs fsyntax) (!env)
       | RESET ->
 	rgbimg := load_image imagename;
 	counter := !counter + 1;
-	refresh ()
+	reload ()
     with
       Lexer.Eof -> lexbufs := List.tl (!lexbufs)
     | exn -> 
