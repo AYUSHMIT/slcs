@@ -99,7 +99,7 @@ module Logic ( Prop : LANG) = struct
 end
 
 module Picture = struct      
-  let almost x y = (x > y - 10) && (x < y + 10)
+  let almost n x y = (x > y - n) && (x < y + n)
     
   let tabulate list =
     let h = Hashtbl.create (List.length list) in
@@ -107,7 +107,7 @@ module Picture = struct
     Hashtbl.find h
       
   let unops =
-    tabulate [("~",fun c y -> almost c.r y.r && almost c.g y.g && almost c.b y.b)] 
+    tabulate [("~",fun c y -> almost 7 c.r y.r && almost 7 c.g y.g && almost 7 c.b y.b)] 
 
   let binops =
     tabulate [("=",(=));

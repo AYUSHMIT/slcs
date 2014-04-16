@@ -5,7 +5,11 @@ csmc: csmc.cmx parser.cmx lexer.cmx image.cmx main.ml
 	$(OCAMLC) $^ -o $@
 
 test: csmc
-	./csmc example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc example-map/output.bmp
+	./csmc example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc example-map/openstreetmap-pisa_output.bmp
+
+test_paper: test
+	for f in example-map/openstreetmap-pisa*.bmp; do convert $$f ../paper/figures/$$(basename $$f .bmp).pdf; done 
+	cp example-map/openstreetmap-pisa.csmc ../paper/figures
 
 interactive-test: csmc
 	rlfe ./csmc example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc || ./csmc example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc
@@ -26,7 +30,7 @@ export: csmc almostclean
 	$(OCAMLC) -c $^ -o $@
 
 almostclean: 
-	rm -f *.cm* a.out *~ \#* *.o example-map/output*.bmp example-map/*~ example-map/\#*
+	rm -f *.cm* a.out *~ \#* *.o example-map/*_output.bmp example-map/*~ example-map/\#*
 
 clean: almostclean 
 	rm -f csmc parser.ml lexer.ml parser.mli
