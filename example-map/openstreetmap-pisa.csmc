@@ -10,7 +10,8 @@ Let stadiumArea =
     !((!stadium) U street);
 
 Let streetsAroundStadium = 
-    street & C^7 stadiumArea;
+    street & C^10 stadiumArea;
 
+Paint "green" street;
 Paint "orange" stadiumArea;
 Paint "red" streetsAroundStadium;
