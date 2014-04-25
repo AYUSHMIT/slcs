@@ -104,8 +104,15 @@ let draw_rgb =
     if not (!inited) then init ();
     Event.sync (Event.send channel (Draw img)))
 	
+let over c1 c2 =
+  let factor = 0.7 in
+  let value x y = int_of_float (((float_of_int x) *. factor) +. ((float_of_int y) *. (1.0 -. factor))) in
+  { r = value c1.r c2.r;
+    g = value c1.g c2.g;
+    b = value c1.b c2.b; }
+    
 let draw_rgb_points rgbimg points color =
   let rgbimg2 = Rgb24.copy rgbimg in
-  PSet.iter (fun (x,y) ->  Rgb24.set rgbimg2 x y color) points;
+  PSet.iter (fun (x,y) ->  Rgb24.set rgbimg2 x y (over color (Rgb24.get rgbimg2 x y))) points;
   rgbimg2
   

@@ -1,0 +1,17 @@
+Let bigStreet = [RED > 160] & [RED < 180] & 
+    [GREEN > 150] & [GREEN < 180] & [BLUE > 200] & [BLUE < 255];
+Let midStreet1 = [RED > 230] & [RED < 240] & 
+    [GREEN > 233] & [GREEN < 240] & [BLUE > 190] & [BLUE < 210];
+Let midStreet2 = [RED > 235] & [RED < 245] & 
+    [GREEN > 220] & [GREEN < 230] & [BLUE > 220] & [BLUE < 230];
+
+Let street = C^3 (bigStreet | midStreet1 | midStreet2);
+
+Let station = [RED > 200] & [RED < 225] & 
+    [GREEN > 30] & [GREEN < 60] & [BLUE > 50] & [BLUE < 80];
+Let stationArea = !((!station) U street);
+Let streetsAroundStation = street & (C^10 stationArea);
+
+Paint "orange" stationArea;
+Paint "green" street;
+Paint "red" streetsAroundStation;
