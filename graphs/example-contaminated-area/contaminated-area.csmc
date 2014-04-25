@@ -1,0 +1,13 @@
+Let danger1 = [safe] & 
+    ( !( ((![contaminated]) U [authorization])) );
+
+Let aux = [contaminated] & 
+    (!(((![safe]) U [decontamination])));
+
+Let danger2 = [safe] & ((!aux) U [authorization]) & 
+    (!((!aux) U [authorization]));
+
+Check F;
+Check danger1;
+Check aux;
+Check danger2;
