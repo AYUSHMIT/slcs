@@ -4,10 +4,16 @@ Let danger1 = [safe] &
 Let aux = [contaminated] & 
     (!(((![safe]) U [decontamination])));
 
-Let danger2 = [safe] & ((!aux) U [authorization]) & 
-    (!((!aux) U [authorization]));
+Let danger2 = [safe] & ((!aux) U [authorization]);
+
+Let reaches(f,g) = !((!g) U (!f));
+
+Let f3 = !( [decontamination] U (![safe]));
+Let f2 = !( (![contaminated]) U (!f3));
+Let f1 = !((![authorization]) U (!f2));
+Let f = [safe] U f1;
 
 Check F;
 Check danger1;
 Check aux;
-Check danger2;
+Check f;

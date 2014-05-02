@@ -4,12 +4,18 @@ OCAMLC = ocamlopt.opt -thread -I /usr/lib/ocaml/camlimages graphics.cmxa camlima
 csmc: csmc.cmx parser.cmx lexer.cmx image.cmx main.ml
 	$(OCAMLC) $^ -o $@
 
-test: csmc
+test: example-map/openstreetmap-pisa_output.bmp example-maze/maze-out.bmp
+
+example-map/openstreetmap-pisa_output.bmp: example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc
 	./csmc example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc example-map/openstreetmap-pisa_output.bmp
 
+example-maze/maze-out.bmp: example-maze/maze.bmp example-maze/maze.csmc
+	./csmc example-maze/maze.bmp example-maze/maze.csmc example-maze/maze-out.bmp
+
 test_paper: test
-	for f in example-map/openstreetmap-pisa*.bmp; do convert $$f ../paper/figures/$$(basename $$f .bmp).pdf; done 
-	cp example-map/openstreetmap-pisa.csmc ../paper/figures
+	for f in example-map/openstreetmap-pisa*.bmp example-maze/maze*.bmp; do convert $$f ../../paper/figures/$$(basename $$f .bmp).pdf; done 
+	cp example-map/openstreetmap-pisa.csmc ../../paper/figures
+	cp example-maze/maze.csmc ../../paper/figures
 
 interactive-test: csmc
 	rlfe ./csmc example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc || ./csmc example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc

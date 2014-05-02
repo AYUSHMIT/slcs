@@ -62,8 +62,11 @@ main:
  | IDE COMMA innerformalarglist {$1::$3}
   ;
   actualarglist:
+    LPAREN inneractualarglist RPAREN {$2}
+  ;
+  inneractualarglist:
  | formula {[$1]}
- | formula COMMA actualarglist {$1::$3}
+ | formula COMMA inneractualarglist {$1::$3}
   ;
   prop:
  | color {Csmc.Picture.COL $1}

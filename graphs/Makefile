@@ -5,14 +5,13 @@ csmc: csmc.cmx parser.cmx lexer.cmx graphs.cmx main.ml
 	$(OCAMLC) $^ -o $@
 
 test: csmc
-	./csmc example-contaminated-area/contaminated-area.csmc example-contaminated-area/contaminated-area
+	./csmc example-maze/maze.csmc example-maze/maze
 
 test_paper: test	
-	cp example-contaminated-area/contaminated-area.csmc example-contaminated-area/contaminated-area-*-out.tex ../paper/figures
-	cd ../paper && pdflatex dmc-main
+	cp example-maze/maze.csmc example-maze/maze-*-out.tex ../../paper/figures
 
 interactive-test: csmc
-	rlfe ./csmc example-contaminated-area/contaminated-area.csmc
+	rlfe ./csmc example-maze/maze.csmc
 
 parser.cmx: parser.ml
 	$(OCAMLC) -c parser.mli
@@ -30,7 +29,7 @@ export: csmc almostclean
 	$(OCAMLC) -c $^ -o $@
 
 almostclean: 
-	rm -f *.cm* a.out *~ \#* *.o example-contaminated-area/*-out*.tex example-contaminated-area/*~ example-contaminated-area/\#*
+	rm -f *.cm* a.out *~ \#* *.o example-maze/*-out*.tex example-maze/*~ example-maze/\#*
 
 clean: almostclean 
 	rm -f csmc parser.ml lexer.ml parser.mli
