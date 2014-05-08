@@ -4,7 +4,7 @@ OCAMLC = ocamlopt.opt -thread -I /usr/lib/ocaml/camlimages graphics.cmxa camlima
 csmc: csmc.cmx parser.cmx lexer.cmx image.cmx main.ml
 	$(OCAMLC) $^ -o $@
 
-test: example-map/openstreetmap-pisa_output.bmp example-maze/maze-out.bmp
+test: csmc example-map/openstreetmap-pisa_output.bmp example-maze/maze-out.bmp
 
 example-map/openstreetmap-pisa_output.bmp: example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc
 	./csmc example-map/openstreetmap-pisa.bmp example-map/openstreetmap-pisa.csmc example-map/openstreetmap-pisa_output.bmp
