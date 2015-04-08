@@ -1,3 +1,12 @@
+NOTE:
+
+This project has been superceded by
+
+https://github.com/vincenzoml/topochecker
+
+Please update your references. The old README is provided below.
+
+
 The Spatial Logics for Closure Spaces model checker
 ===================================================
 
